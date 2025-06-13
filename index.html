@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0a0a23">
+    <title>Jumper - Космический Прыгун</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="game-container">
+        <header class="game-header">
+            <h1 class="game-title">
+                <span class="title-main">JUMPER</span>
+                <span class="title-sub">Космический кошачий попрыгунчик</span>
+            </h1>
+        </header>
+          <div class="canvas-container">
+            <canvas id="gameCanvas" width="400" height="600"></canvas>
+            
+            <!-- Мобильные элементы управления -->
+            <div class="mobile-controls" id="mobileControls">
+                <div class="control-left">
+                    <button class="mobile-btn movement-btn" id="leftBtn">
+                        <span class="btn-icon">←</span>
+                    </button>
+                    <button class="mobile-btn movement-btn" id="rightBtn">
+                        <span class="btn-icon">→</span>
+                    </button>
+                </div>
+                <div class="control-right">
+                    <button class="mobile-btn action-btn" id="shootBtn">
+                        <span class="btn-icon">🚀</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="controls-hint">
+                <div class="control-item desktop-only">
+                    <span class="key">←→</span>
+                    <span class="description">Движение</span>
+                </div>
+                <div class="control-item desktop-only">
+                    <span class="key">SPACE</span>
+                    <span class="description">Выстрел</span>
+                </div>
+                <div class="control-item">
+                    <span class="key">ENTER</span>
+                    <span class="description">Рестарт</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
