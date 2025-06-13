@@ -901,44 +901,54 @@ function checkPlayerEnemyCollision() {
 }
 
 // --- ФОН ---
-const bgImages = [
-    Object.assign(new Image(), {src: 'background1.png'}),
-    Object.assign(new Image(), {src: 'background2.png'}),
-    Object.assign(new Image(), {src: 'background3.png'}),
-    Object.assign(new Image(), {src: 'background4.png'}),
-    Object.assign(new Image(), {src: 'background5.png'})
-];
+const bgImage = new Image();
+bgImage.src = 'background1.png';
 
 function drawBackground(scrollY) {
-    // scrollY — сколько всего игрок "поднялся" (score + смещение)
-    let y = 0;
-    let bgIdx = 0;
-    let localY = scrollY;
-    // Высота одного фона
-    const bgH = canvas.height;
-    // Первый фон
-    ctx.drawImage(bgImages[0], 0, y, canvas.width, bgH);
-    y -= bgH;
-    localY -= bgH;
-    // Второй фон
-    if (localY > -bgH) {
-        ctx.drawImage(bgImages[1], 0, y, canvas.width, bgH);
-        y -= bgH;
-        localY -= bgH;
-    }
-    // Далее чередуем 3 и 4
-    let altIdx = 0;
-    while (localY > -bgH * 2) {
-        const idx = 2 + (altIdx % 2); // 2 или 3
-        ctx.drawImage(bgImages[idx], 0, y, canvas.width, bgH);
-        y -= bgH;
-        localY -= bgH;
-        altIdx++;
-        // На большой высоте — вставляем 5-й фон
-        if (score > 5000 && localY > -bgH * 2 && altIdx === 2) {
-            ctx.drawImage(bgImages[4], 0, y, canvas.width, bgH);
-            y -= bgH;
-            localY -= bgH;
+    // Проверяем, загружен ли фон
+    if (bgImage.complete && bgImage.naturalWidth > 0) {
+        // Рисуем повторяющийся фон
+        const bgHeight = canvas.height;
+        const offset = scrollY % bgHeight;
+        
+        // Рисуем два фона для бесшовного скроллинга
+        ctx.drawImage(bgImage, 0, -offset, canvas.width, bgHeight);
+        ctx.drawImage(bgImage, 0, bgHeight - offset, canvas.width, bgHeight);
+    } else {
+        // Резервный градиентный фон если изображение не загрузилось
+        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        
+        if (score < 1000) {
+            gradient.addColorStop(0, '#0a0a23');
+            gradient.addColorStop(0.5, '#1a1a40');
+            gradient.addColorStop(1, '#2d2d5a');
+        } else if (score < 3000) {
+            gradient.addColorStop(0, '#1a0a40');
+            gradient.addColorStop(0.5, '#3a1a60');
+            gradient.addColorStop(1, '#5a2a80');
+        } else if (score < 5000) {
+            gradient.addColorStop(0, '#401020');
+            gradient.addColorStop(0.5, '#602040');
+            gradient.addColorStop(1, '#803060');
+        } else {
+            gradient.addColorStop(0, '#403010');
+            gradient.addColorStop(0.5, '#605020');
+            gradient.addColorStop(1, '#807030');
+        }
+        
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Добавляем звезды
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        for (let i = 0; i < 50; i++) {
+            const x = (Math.sin(i * 137.5) * canvas.width + canvas.width) % canvas.width;
+            const y = ((i * 73 + scrollY * 0.1) % (canvas.height + 100)) - 50;
+            const size = Math.sin(i) * 2 + 1;
+            
+            ctx.beginPath();
+            ctx.arc(x, y, size, 0, Math.PI * 2);
+            ctx.fill();
         }
     }
 }
