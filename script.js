@@ -369,21 +369,29 @@ function updateBreakingPlatforms() {
 
 // --- ФУНКЦИИ РИСОВАНИЯ ---
 let alienImg = new Image();
-alienImg.src = 'alien.svg';
+alienImg.src = 'alien.svg?' + Date.now(); // Добавляем timestamp для обхода кеша
+
+// Добавляем обработчики для отладки загрузки изображения
+alienImg.onload = function() {
+    console.log('✅ alien.svg загружен успешно', alienImg.naturalWidth, 'x', alienImg.naturalHeight);
+};
+
+alienImg.onerror = function() {
+    console.error('❌ Ошибка загрузки alien.svg');
+};
 
 function drawPlayer() {
     ctx.save();
     
     // Эффект свечения игрока
     ctx.shadowBlur = 25;
-    ctx.shadowColor = '#7ed957';
+    ctx.shadowColor = '#8e24aa';
     
     // Добавляем пульсирующий эффект при движении
     const time = Date.now() * 0.01;
     const pulse = 1 + Math.sin(time) * 0.05;
     const glowIntensity = 0.8 + Math.sin(time * 2) * 0.2;
-    
-    // Эффект движения - след
+      // Эффект движения - след
     if (Math.abs(player.dx) > 0) {
         ctx.globalAlpha = 0.3;
         for (let i = 1; i <= 3; i++) {
@@ -392,16 +400,14 @@ function drawPlayer() {
             if (alienImg.complete && alienImg.naturalWidth > 0) {
                 ctx.drawImage(alienImg, trailX, player.y, player.width * (1 - i * 0.1), player.height * (1 - i * 0.1));
             } else {
-                ctx.fillStyle = `rgba(126, 217, 87, ${0.3 - i * 0.1})`;
+                ctx.fillStyle = `rgba(142, 36, 170, ${0.3 - i * 0.1})`;
                 ctx.fillRect(trailX, player.y, player.width * (1 - i * 0.1), player.height * (1 - i * 0.1));
             }
         }
         ctx.globalAlpha = 1;
-    }
-    
-    // Основной игрок с улучшенными эффектами
+    }// Основной игрок с фиолетовыми эффектами
     ctx.shadowBlur = 30 * glowIntensity;
-    ctx.shadowColor = '#7ed957';
+    ctx.shadowColor = '#8e24aa';
     
     if (alienImg.complete && alienImg.naturalWidth > 0) {
         // Добавляем легкое масштабирование
@@ -410,20 +416,26 @@ function drawPlayer() {
         const offsetX = (scaledWidth - player.width) / 2;
         const offsetY = (scaledHeight - player.height) / 2;
         
+        // Рисуем alien.svg изображение
         ctx.drawImage(alienImg, player.x - offsetX, player.y - offsetY, scaledWidth, scaledHeight);
     } else {
-        // Резервный прямоугольник с градиентом
+        // Резервный прямоугольник с фиолетовым градиентом
         const gradient = ctx.createRadialGradient(
             player.x + player.width/2, player.y + player.height/2, 0,
             player.x + player.width/2, player.y + player.height/2, player.width/2
         );
-        gradient.addColorStop(0, '#a4ed71');
-        gradient.addColorStop(0.7, '#7ed957');
-        gradient.addColorStop(1, '#5cb043');
+        gradient.addColorStop(0, '#ba68c8');
+        gradient.addColorStop(0.7, '#8e24aa');
+        gradient.addColorStop(1, '#6a1b9a');
         
         ctx.fillStyle = gradient;
-        ctx.fillRect(player.x, player.y, player.width * pulse, player.height * pulse);
-          // Добавляем блик
+        const scaledWidth = player.width * pulse;
+        const scaledHeight = player.height * pulse;
+        const offsetX = (scaledWidth - player.width) / 2;
+        const offsetY = (scaledHeight - player.height) / 2;
+        ctx.fillRect(player.x - offsetX, player.y - offsetY, scaledWidth, scaledHeight);
+        
+        // Добавляем блик
         ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
         ctx.fillRect(player.x + 5, player.y + 5, player.width * 0.3, player.height * 0.2);
     }
@@ -904,52 +916,20 @@ function checkPlayerEnemyCollision() {
 const bgImage = new Image();
 bgImage.src = 'background1.png';
 
-function drawBackground(scrollY) {
+function drawBackground() {
     // Проверяем, загружен ли фон
     if (bgImage.complete && bgImage.naturalWidth > 0) {
-        // Рисуем повторяющийся фон
-        const bgHeight = canvas.height;
-        const offset = scrollY % bgHeight;
-        
-        // Рисуем два фона для бесшовного скроллинга
-        ctx.drawImage(bgImage, 0, -offset, canvas.width, bgHeight);
-        ctx.drawImage(bgImage, 0, bgHeight - offset, canvas.width, bgHeight);
+        // Рисуем статичный фон, растянутый на весь холст
+        ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
     } else {
         // Резервный градиентный фон если изображение не загрузилось
         const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-        
-        if (score < 1000) {
-            gradient.addColorStop(0, '#0a0a23');
-            gradient.addColorStop(0.5, '#1a1a40');
-            gradient.addColorStop(1, '#2d2d5a');
-        } else if (score < 3000) {
-            gradient.addColorStop(0, '#1a0a40');
-            gradient.addColorStop(0.5, '#3a1a60');
-            gradient.addColorStop(1, '#5a2a80');
-        } else if (score < 5000) {
-            gradient.addColorStop(0, '#401020');
-            gradient.addColorStop(0.5, '#602040');
-            gradient.addColorStop(1, '#803060');
-        } else {
-            gradient.addColorStop(0, '#403010');
-            gradient.addColorStop(0.5, '#605020');
-            gradient.addColorStop(1, '#807030');
-        }
+        gradient.addColorStop(0, '#0a0a23');
+        gradient.addColorStop(0.5, '#1a1a40');
+        gradient.addColorStop(1, '#2d2d5a');
         
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        // Добавляем звезды
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-        for (let i = 0; i < 50; i++) {
-            const x = (Math.sin(i * 137.5) * canvas.width + canvas.width) % canvas.width;
-            const y = ((i * 73 + scrollY * 0.1) % (canvas.height + 100)) - 50;
-            const size = Math.sin(i) * 2 + 1;
-            
-            ctx.beginPath();
-            ctx.arc(x, y, size, 0, Math.PI * 2);
-            ctx.fill();
-        }
     }
 }
 
@@ -1046,7 +1026,7 @@ function createJumpParticles(x, y) {
         const life = 20 + Math.random() * 15;
         const size = 1 + Math.random() * 2;
         
-        particles.push(new Particle(x, y, vx, vy, '#7ed957', life, size));
+        particles.push(new Particle(x, y, vx, vy, '#8e24aa', life, size));
     }
 }
 
@@ -1204,13 +1184,15 @@ function update() {
             if (platform.type === 'breakable') {
                 if (!platform.breaking) {
                     platform.breaking = true;
-                    platform.breakAnim = 0;                    // Создаем частицы при разрушении платформы
+                    platform.breakAnim = 0;
+                    // Создаем частицы при разрушении платформы
                     createPlatformBreakParticles(platform);
                     playSound('hit'); // Используем звук hit для разрушения платформы
                 }
                 player.dy = player.jumpPower; // Подпрыгиваем всегда
                 // Создаем частицы при прыжке
                 createJumpParticles(player.x + player.width / 2, player.y + player.height);
+                playSound('jump'); // Добавляем звук прыжка
             } else if (platform.type === 'multi-break') {
                 if (!platform.breaking) {
                     if (platform.hitsLeft > 1) {
@@ -1230,7 +1212,9 @@ function update() {
                 }
                 player.dy = player.jumpPower; // Подпрыгиваем всегда
                 // Создаем частицы при прыжке
-                createJumpParticles(player.x + player.width / 2, player.y + player.height);            } else if (platform.type === 'normal') {
+                createJumpParticles(player.x + player.width / 2, player.y + player.height);
+                playSound('jump'); // Добавляем звук прыжка
+            } else if (platform.type === 'normal') {
                 player.dy = player.jumpPower; // Подпрыгиваем
                 // Создаем частицы при прыжке
                 createJumpParticles(player.x + player.width / 2, player.y + player.height);
@@ -1300,10 +1284,9 @@ function update() {
 
     // --- ОЧИСТКА И РИСОВКА ---
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    applyCamera();
-    // Рисуем фон с учётом текущего "подъёма"
-    drawBackground(score + (canvas.height / 2 - player.y));
+      applyCamera();
+    // Рисуем фон
+    drawBackground();
     drawPlatforms();
     drawPlayer();
     drawScore();
